@@ -3,3 +3,4 @@ pip
 libffi-devel
 python3.5-dev
 asyncio
+requests
