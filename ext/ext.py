@@ -12,11 +12,11 @@ class Extension(object):
     def join_params(self, params):
         return ' '.join(params)
 
-    async def reply(self, message, reply_with, mention=False):
+    async def reply(self, message, reply_with, mention=False, delete=True):
         if(mention):
             reply_with = '%s: %s' % (message.author.mention, reply_with)
         msg = await self.bot.send_message(message.channel, reply_with)
-        if(self.delete):
+        if(delete and self.delete):
             async def delete_message():
                 await asyncio.sleep(self.delete)
                 await self.bot.delete_message(msg)
