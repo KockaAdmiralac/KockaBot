@@ -40,7 +40,7 @@ class Extension(Super):
         self.data[id] = user
         load.write_data('profile', self.data)
         # Give role to the person
-        await self.bot.add_roles(message.author, self.role)
+        await self.bot.add_roles(message.server.get_member(id), self.role)
         # Posting to webhook
         requests.post('https://discordapp.com/api/webhooks/%s/%s' % (self.config['webhook_id'], self.config['webhook_token']), json={ 'content': '<@!%s> - [%s](%s)' % (id, user, self.user_profile(user)) })
         # Clearing the channel
