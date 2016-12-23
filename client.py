@@ -12,7 +12,7 @@ class Bot(Client):
         self.prefix = config.get('prefix', '!')
         self.separator = config.get('separator', ' ')
         self.extensions = config.get('extensions')
-        self.use = config.get('use', USE_MASTER)
+        self.use = int(config.get('use', USE_MASTER))
         if('token' in config):
             self.run(config['token'])
         elif('user' in config and 'password' in config):

@@ -19,6 +19,7 @@ class Extension(object):
         if(delete and self.delete):
             async def delete_message():
                 await asyncio.sleep(self.delete)
+                await self.bot.delete_message(message)
                 await self.bot.delete_message(msg)
             asyncio.ensure_future(delete_message())
 
