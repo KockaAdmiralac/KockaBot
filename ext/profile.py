@@ -17,19 +17,23 @@ class Extension(Super):
     def user_profile(self, user):
         return '<http://%s.wikia.com/wiki/Special:Contribs/%s>' % (self.domain, quote(user))
 
-    async def on_profile(self, message, params):
+    async def command_profile(self, message, params):
         key = self.mention_regex.findall(params[0])[0]
         if key in self.data:
             await self.reply(message, 'User profile: %s' % self.user_profile(self.data[key]), False, False)
         else:
             await self.reply(message, 'User profile for %s not found' % params[0])
 
-    async def on_verify(self, message, params):
-        if not self.initialized:
-            self.bind_channel = self.bot.get_channel(self.config['bind_channel'])
-            self.clear_channel = self.bot.get_channel(self.config['clear_channel'])
-            self.role = [r for r in self.bind_channel.server.roles if r.id == self.config['role']][0]
-            self.initialized = True
+    def initialize(self):
+        if(self.initialized):
+            pass
+        self.bind_channel = self.bot.get_channel(self.config['bind_channel'])
+        self.clear_channel = self.bot.get_channel(self.config['clear_channel'])
+        self.role = [r for r in self.bind_channel.server.roles if r.id == self.config['role']][0]
+        self.initialized = True
+
+    async def command_verify(self, message, params):
+        self.initialize()
         # Check permissions
         if message.channel != self.bind_channel:
             pass
@@ -48,3 +52,10 @@ class Extension(Super):
         delete = await self.bot.purge_from(self.clear_channel, after=msg)
         # Responding
         await self.reply(message, 'Added %s to database!' % params[0], True)
+
+    async def on_member_create(self, member):
+        self.initialize()
+        if(member.id in self.data):
+            await self.bot.add_roles(member, self.role)
+        else:
+            await self.bot.send_message(self.clear_channel, self.config['welcome'] % member.mention)

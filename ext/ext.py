@@ -25,4 +25,19 @@ class Extension(object):
 
     async def call_command(self, message, command, args):
         if(command in self.commands):
-            await getattr(self, 'on_%s' % command)(message, args)
+            self.bot.loop.create_task(getattr(self, 'command_%s' % command)(message, args))
+
+    async def call_listener(self, controller, listener, args):
+        try:
+            method = getattr(self, 'on_%s_%s' % (controller, listener))
+            l = len(args)
+            if(l == 1):
+                generator = method(args[0])
+            elif(l == 2):
+                generator = method(args[0], args[1])
+            else:
+                generator = method(args[0], args[1], args[2])
+            # Creating handler
+            self.bot.loop.create_task(generator)
+        except AttributeError:
+            pass
