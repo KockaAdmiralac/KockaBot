@@ -31,7 +31,9 @@ class Extension(object):
         try:
             method = getattr(self, 'on_%s_%s' % (controller, listener))
             l = len(args)
-            if(l == 1):
+            if(l == 0):
+                generator = method()
+            elif(l == 1):
                 generator = method(args[0])
             elif(l == 2):
                 generator = method(args[0], args[1])

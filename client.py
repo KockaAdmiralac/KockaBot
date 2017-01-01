@@ -23,6 +23,7 @@ class Bot(Client):
     async def on_ready(self):
         self.master = self.config.get('master', (await self.application_info()).owner)
         print('Running on %s account' % self.user.name)
+        await self.dispatch_listener('client', 'ready')
         if('game' in self.config):
             conf = self.config['game']
             await self.change_presence(game=Game(name=conf['name'], type=int(conf.get('streaming', 0)), url=conf.get('url', 'https://github.com/KockaAdmiralac/KockaBot')))
