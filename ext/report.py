@@ -1,5 +1,4 @@
 from ext import Extension as Super
-import json
 import load
 
 FLAG_REPORT = 0
@@ -33,14 +32,14 @@ This message is where new reports accumulate
                 if len(v) > 0:
                     m += """**Spam users: {0}**```
 == {0} ==
-{{{{Report spam|{0}|Spam|{1}|Your username!!!|{{{{subst:CURRENTTIME}}}}, {{{{subst:CURRENTMONTHNAME}}}} {{{{subst:CURRENTDAY}}}}, {{{{subst:CURRENTYEAR}}}}}}}}
+{{{{Report spam|{0}|Spam|{1}|{{{{subst:REVISIONUSER}}}}|{{{{subst:CURRENTTIME}}}}, {{{{subst:CURRENTMONTHNAME}}}} {{{{subst:CURRENTDAY}}}}, {{{{subst:CURRENTYEAR}}}}}}}}
 ```""".format(k, '|'.join(v))
         if len(self.temp['p']) > 0:
             for k, v in self.temp['p'].items():
                 if len(v) > 0:
                     m += """**Spam profiles: {0}**```
 == {0} ==
-{{{{Report profile|{0}|Spam|{1}|Your username!!!|{{{{subst:CURRENTTIME}}}}, {{{{subst:CURRENTMONTHNAME}}}} {{{{subst:CURRENTDAY}}}}, {{{{subst:CURRENTYEAR}}}}}}}}
+{{{{Report profile|{0}|Spam|{1}|{{{{subst:REVISIONUSER}}}}|{{{{subst:CURRENTTIME}}}}, {{{{subst:CURRENTMONTHNAME}}}} {{{{subst:CURRENTDAY}}}}, {{{{subst:CURRENTYEAR}}}}}}}}
 ```""".format(k, '|'.join(v))
         if not self.message:
             self.message = await self.bot.send_message(self.bot.get_channel(self.config['bind_channel']), m)
