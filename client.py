@@ -7,16 +7,16 @@ USE_MASTER = 1
 USE_NONE = 2
 
 class Bot(Client):
-    def initialize(self, config):
+    async def initialize(self, config):
         self.config = config
         self.prefix = config.get('prefix', '!')
         self.separator = config.get('separator', ' ')
         self.extensions = config.get('extensions')
         self.selfbot = config.get('selfbot', False)
         if('token' in config):
-            self.run(config['token'])
+            await self.start(config['token'])
         elif('user' in config and 'password' in config):
-            self.run(config['user'], config['password'])
+            await self.start(config['user'], config['password'])
         else:
             raise ConfigurationError('Login credentials not supplied')
 
