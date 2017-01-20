@@ -64,8 +64,8 @@ class Extension(Super):
             del array[:]
         for e in el.split('|'):
             [
-                lambda: array.append(e) if not e in array else False,
-                lambda: array.remove(e) if e in array else False,
+                lambda: array.append(e.replace('_', ' ')) if not e in array else False,
+                lambda: array.remove(e.replace('_', ' ')) if e in array else False,
                 lambda: temp(array)
             ][flag]()
 
