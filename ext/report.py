@@ -62,11 +62,12 @@ class Extension(Super):
         # Python y u do dis
         def temp(array):
             del array[:]
-        [
-            lambda: array.append(el),
-            lambda: array.remove(el),
-            lambda: temp(array)
-        ][flag]()
+        for e in el.split('|'):
+            [
+                lambda: array.append(e) if not e in array else False,
+                lambda: array.remove(e) if e in array else False,
+                lambda: temp(array)
+            ][flag]()
 
     async def base_report(self, message, params, flag):
         params.append('')
