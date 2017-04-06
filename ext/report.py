@@ -13,7 +13,7 @@ class Extension(Super):
         self.register_commands('report', 'unreport', 'resolve', 'kocka')
         self.mw = mwclient.Site('vstf.wikia.com', path='/')
         self.mw.login(config['username'], config['password'])
-        for t in ['t', 'w', 's', 'p']:
+        for t in ['t', 'w', 's', 'p', 'k']:
             if not t in self.temp:
                 if self.is_wiki_type(t):
                     self.temp[t] = []
@@ -26,7 +26,8 @@ class Extension(Super):
             't': '{{{{badwiki|{0}}}}}'.format('}}\n{{badwiki|'.join(self.temp['t'])),
             'w': '{{{{badwiki|{0}}}}}'.format('}}\n{{badwiki|'.join(self.temp['w'])),
             's': '== {0} ==\n{{{{Report spam|{0}|Spam|{1}|{{{{subst:REVISIONUSER}}}}|~~~~~}}}}'.format(p, '|'.join(self.temp['s'].get(p, []))),
-            'p': '== {0} ==\n{{{{Report profile|{0}|Spam|{1}|{{{{subst:REVISIONUSER}}}}|~~~~~}}}}'.format(p, '|'.join(self.temp['p'].get(p, [])))
+            'p': '== {0} ==\n{{{{Report profile|{0}|Spam|{1}|{{{{subst:REVISIONUSER}}}}|~~~~~}}}}'.format(p, '|'.join(self.temp['p'].get(p, []))),
+            'k': '\n'.join([ ('* [[w:c:{0}:Special:Contribs/{1}]]'.format(x.split(':')[0], x.split(':')[1])) for x in self.temp['k'] ])
         }[t]
 
     async def update_report(self, msg=None):
@@ -44,6 +45,8 @@ class Extension(Super):
             for k, v in self.temp['p'].items():
                 if len(v) > 0:
                     m += '**Spam profiles: %s**```%s```' % (k, self.report_message('p', k))
+        if len(self.temp['k']) > 0:
+            m += """**Korean spam**```%s```""" % self.report_message('k')
         if not self.message:
             self.message = await self.bot.send_message(self.bot.get_channel(self.config['bind_channel']), m)
         else:
@@ -53,7 +56,7 @@ class Extension(Super):
 
 
     def is_wiki_type(self, t):
-        return t in ['t', 'w']
+        return t in ['t', 'w', 'k']
 
     def is_spam_type(self, t):
         return t in ['s', 'p']
@@ -73,7 +76,7 @@ class Extension(Super):
         params.append('')
         t = params[0].lower()
         if self.is_wiki_type(t):
-            self.modify_array(self.temp[t], params[1].lower(), flag)
+            self.modify_array(self.temp[t], params[1], flag)
             await self.update_report(message)
         elif self.is_spam_type(t):
             wiki = params[1].lower()
