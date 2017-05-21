@@ -1,3 +1,4 @@
+from discord.errors import NotFound
 import asyncio
 
 class Extension(object):
@@ -19,8 +20,14 @@ class Extension(object):
         if(delete and self.delete):
             async def delete_message():
                 await asyncio.sleep(self.delete)
-                await self.bot.delete_message(message)
-                await self.bot.delete_message(msg)
+                try:
+                    await self.bot.delete_message(message)
+                except NotFound:
+                    print('Message not found while deleting reply')
+                try:
+                    await self.bot.delete_message(msg)
+                except NotFound:
+                    print('Message not found while deleting reply')
             asyncio.ensure_future(delete_message())
 
     async def call_command(self, message, command, args):

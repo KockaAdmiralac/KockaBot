@@ -15,7 +15,7 @@ class Extension(Super):
         self.mw.login(config['username'], config['password'])
         for t in ['t', 'w', 's', 'p', 'k']:
             if not t in self.temp:
-                if self.is_wiki_type(t):
+                if self.is_wiki_type(t) or t == 'k':
                     self.temp[t] = []
                 else:
                     self.temp[t] = {}
@@ -56,7 +56,7 @@ class Extension(Super):
 
 
     def is_wiki_type(self, t):
-        return t in ['t', 'w', 'k']
+        return t in ['t', 'w']
 
     def is_spam_type(self, t):
         return t in ['s', 'p']
@@ -84,6 +84,14 @@ class Extension(Super):
                 self.temp[t][wiki] = []
             self.modify_array(self.temp[t][wiki], ' '.join(params[2:]).strip(), flag)
             await self.update_report(message)
+        elif t == 'k':
+            wiki = params[1]
+            split = wiki.split(':')
+            if len(split) == 2:
+                wiki = split[0].lower()
+                params[2] = split[1]
+            self.modify_array(self.temp['k'], wiki + ':' + ' '.join(params[2:]).strip(), flag)
+            await self.update_report(message)
         else:
             await self.reply(message, 'Invalid report type!', True)
 
@@ -103,9 +111,10 @@ class Extension(Super):
                 'w': 'Wiki',
                 's': 'Spam',
                 't': 'Three word wikis',
-                'p': 'User profile headers'
+                'p': 'User profile headers',
+                'k': 'Spam/Biglist'
             }[params[0]]]
             text = page.text()
             text += '\n' + self.report_message(params[0], params[1])
-            page.save(text, summary='Adding reports')
+            page.save(text, summary='Moving reports of Wikia Watchers')
             await self.base_report(message, params, FLAG_RESOLVE)
