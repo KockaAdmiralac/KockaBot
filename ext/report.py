@@ -13,9 +13,9 @@ class Extension(Super):
         self.register_commands('report', 'unreport', 'resolve', 'kocka')
         self.mw = mwclient.Site('vstf.wikia.com', path='/')
         self.mw.login(config['username'], config['password'])
-        for t in ['t', 'w', 's', 'p', 'k']:
+        for t in ['w', 's', 'p', 'b']:
             if not t in self.temp:
-                if self.is_wiki_type(t) or t == 'k':
+                if t == 'w' or t == 'b':
                     self.temp[t] = []
                 else:
                     self.temp[t] = {}
@@ -23,18 +23,15 @@ class Extension(Super):
 
     def report_message(self, t, p=''):
         return {
-            't': '{{{{badwiki|{0}}}}}'.format('}}\n{{badwiki|'.join(self.temp['t'])),
             'w': '{{{{badwiki|{0}}}}}'.format('}}\n{{badwiki|'.join(self.temp['w'])),
             's': '== {0} ==\n{{{{Report spam|{0}|Spam|{1}|{{{{subst:REVISIONUSER}}}}|~~~~~}}}}'.format(p, '|'.join(self.temp['s'].get(p, []))),
             'p': '== {0} ==\n{{{{Report profile|{0}|Spam|{1}|{{{{subst:REVISIONUSER}}}}|~~~~~}}}}'.format(p, '|'.join(self.temp['p'].get(p, []))),
-            'k': '\n'.join([ ('* [[w:c:{0}:Special:Contribs/{1}]]'.format(x.split(':')[0], x.split(':')[1])) for x in self.temp['k'] ])
+            'b': '\n'.join([ ('* [[w:c:{0}:Special:Contribs/{1}]]'.format(x.split(':')[0], x.split(':')[1])) for x in self.temp['b'] ])
         }[t]
 
     async def update_report(self, msg=None):
         load.write_data('report', self.temp)
         m = """__**Report message**__\nThis message is where new reports accumulate\n"""
-        if len(self.temp['t']) > 0:
-            m += '**Three word wikis**```%s```' % self.report_message('t')
         if len(self.temp['w']) > 0:
             m += '**Spam wikis**```%s```' % self.report_message('w')
         if len(self.temp['s']) > 0:
@@ -45,8 +42,8 @@ class Extension(Super):
             for k, v in self.temp['p'].items():
                 if len(v) > 0:
                     m += '**Spam profiles: %s**```%s```' % (k, self.report_message('p', k))
-        if len(self.temp['k']) > 0:
-            m += """**Korean spam**```%s```""" % self.report_message('k')
+        if len(self.temp['b']) > 0:
+            m += """**XRumer spam**```%s```""" % self.report_message('b')
         if not self.message:
             self.message = await self.bot.send_message(self.bot.get_channel(self.config['bind_channel']), m)
         else:
@@ -54,9 +51,6 @@ class Extension(Super):
         if(msg):
             await self.reply(msg, 'Reports updated!', True)
 
-
-    def is_wiki_type(self, t):
-        return t in ['t', 'w']
 
     def is_spam_type(self, t):
         return t in ['s', 'p']
@@ -75,7 +69,7 @@ class Extension(Super):
     async def base_report(self, message, params, flag):
         params.append('')
         t = params[0].lower()
-        if self.is_wiki_type(t):
+        if t == 'w':
             self.modify_array(self.temp[t], params[1], flag)
             await self.update_report(message)
         elif self.is_spam_type(t):
@@ -84,14 +78,19 @@ class Extension(Super):
                 self.temp[t][wiki] = []
             self.modify_array(self.temp[t][wiki], ' '.join(params[2:]).strip(), flag)
             await self.update_report(message)
-        elif t == 'k':
+        elif t == 'b' or t == 'x':
             wiki = params[1]
             split = wiki.split(':')
-            if len(split) == 2:
+            if len(split) >= 2:
                 wiki = split[0].lower()
-                params[2] = split[1]
-            self.modify_array(self.temp['k'], wiki + ':' + ' '.join(params[2:]).strip(), flag)
-            await self.update_report(message)
+                params[2] = ':'.join(split[1:])
+                self.modify_array(self.temp['b'], wiki + ':' + ' '.join(params[2:]).strip(), flag)
+                await self.update_report(message)
+            elif flag == FLAG_RESOLVE:
+                self.modify_array(self.temp['b'], wiki + ':' + ' '.join(params[2:]).strip(), flag)
+                await self.update_report(message)
+            else:
+                await self.reply(message, 'Format for biglist spam is `!report b wiki:user`!')
         else:
             await self.reply(message, 'Invalid report type!', True)
 
@@ -110,9 +109,8 @@ class Extension(Super):
             page = self.mw.Pages['Report:' + {
                 'w': 'Wiki',
                 's': 'Spam',
-                't': 'Three word wikis',
                 'p': 'User profile headers',
-                'k': 'Spam/Biglist'
+                'b': 'Spam/Biglist'
             }[params[0]]]
             text = page.text()
             text += '\n' + self.report_message(params[0], params[1])
