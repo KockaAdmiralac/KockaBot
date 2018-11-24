@@ -33,7 +33,7 @@ class Bot(Client):
             (self.selfbot and message.author.id != self.master.id) or
             not message.content.startswith(self.prefix)
         ):
-            pass
+            return
         arr = message.content[len(self.prefix):].split(self.separator)
         command = arr[0]
         params = arr[1:]

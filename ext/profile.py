@@ -10,7 +10,7 @@ class Extension(Super):
         super(Extension, self).__init__(bot, config)
         self.data = load.load_data('profile')
         self.register_commands('profile', 'verify')
-        self.mention_regex = re.compile('<@!?(\d+)>')
+        self.mention_regex = re.compile(r'<@!?(\d+)>')
         self.domain = config.get('domain', 'ut')
         self.initialized = False
 

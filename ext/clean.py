@@ -13,7 +13,7 @@ class Extension(Super):
         msg = None
         if len(params) == 0:
             cid = str(channel.id)
-            if (cid in self.data):
+            if cid in self.data:
                 msg = self.data[cid]
         else:
             msg = int(params[0])
@@ -36,6 +36,6 @@ class Extension(Super):
         if len(params) == 0:
             await self.reply(message, 'No message ID specified!', True)
         else:
-            self.data[message.channel.id] = int(params[0])
+            self.data[str(message.channel.id)] = int(params[0])
             load.write_data('clean', self.data)
             await self.reply(message, 'Message ID set!', True)

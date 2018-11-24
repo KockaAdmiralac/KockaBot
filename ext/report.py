@@ -55,11 +55,16 @@ class Extension(Super):
     def is_spam_type(self, t):
         return t in ['s', 'p']
 
-    def modify_array(self, array, el, flag):
+    def modify_array(self, array, el, flag, nosplit=False):
+        # Don't ask. Please just don't ask.
+        if nosplit:
+            el = [el]
+        else:
+            el = el.split('|')
         # Python y u do dis
         def temp(array):
             del array[:]
-        for e in el.split('|'):
+        for e in el:
             [
                 lambda: array.append(e.replace('_', ' ')) if not e in array else False,
                 lambda: array.remove(e.replace('_', ' ')) if e in array else False,
@@ -70,7 +75,11 @@ class Extension(Super):
         params.append('')
         t = params[0].lower()
         if t == 'w':
-            self.modify_array(self.temp[t], params[1], flag)
+            for e in params[1].split('|'):
+                split = e.split(':')
+                if len(split) > 1 and split[1] == 'f':
+                    split[0] = split[0] + '||fandom'
+                self.modify_array(self.temp[t], split[0], flag, nosplit=True)
             await self.update_report(message)
         elif self.is_spam_type(t):
             wiki = params[1].lower()
