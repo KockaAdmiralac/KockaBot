@@ -45,9 +45,9 @@ class Extension(Super):
         if len(self.temp['b']) > 0:
             m += """**XRumer spam**```%s```""" % self.report_message('b')
         if not self.message:
-            self.message = await self.bot.send_message(self.bot.get_channel(self.config['bind_channel']), m)
+            self.message = await self.bot.get_channel(self.config['bind_channel']).send(m)
         else:
-            await self.bot.edit_message(self.message, new_content=m)
+            await self.message.edit(content=m)
         if(msg):
             await self.reply(msg, 'Reports updated!', True)
 

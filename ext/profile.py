@@ -29,7 +29,7 @@ class Extension(Super):
             pass
         self.bind_channel = self.bot.get_channel(self.config['bind_channel'])
         self.clear_channel = self.bot.get_channel(self.config['clear_channel'])
-        self.role = [r for r in self.bind_channel.server.roles if r.id == self.config['role']][0]
+        self.role = [r for r in self.bind_channel.guild.roles if r.id == self.config['role']][0]
         self.initialized = True
 
     async def command_verify(self, message, params):
@@ -44,18 +44,18 @@ class Extension(Super):
         self.data[id] = user
         load.write_data('profile', self.data)
         # Give role to the person
-        await self.bot.add_roles(message.server.get_member(id), self.role)
+        await message.guild.get_member(int(id)).add_roles(self.role)
         # Posting to webhook
         requests.post('https://discordapp.com/api/webhooks/%s/%s' % (self.config['webhook_id'], self.config['webhook_token']), json={ 'content': '<@!%s> - [%s](%s)' % (id, user, self.user_profile(user)) })
         # Clearing the channel
-        msg = await self.bot.get_message(self.clear_channel, self.config['welcome_msg'])
-        delete = await self.bot.purge_from(self.clear_channel, after=msg)
+        msg = await self.clear_channel.get_message(self.config['welcome_msg'])
+        delete = await self.clear_channel.purge(after=msg)
         # Responding
         await self.reply(message, 'Added %s to database!' % params[0], True)
 
     async def on_member_create(self, member):
         self.initialize()
         if(member.id in self.data):
-            await self.bot.add_roles(member, self.role)
+            await member.add_roles(self.role)
         else:
-            await self.bot.send_message(self.clear_channel, self.config['welcome'] % member.mention)
+            await self.clear_channel.send(self.config['welcome'] % member.mention)

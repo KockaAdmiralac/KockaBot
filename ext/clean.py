@@ -12,8 +12,8 @@ class Extension(Super):
         channel = message.channel
         msg = None
         if len(params) == 0:
-            cid = channel.id
-            if(cid in self.data):
+            cid = str(channel.id)
+            if (cid in self.data):
                 msg = self.data[cid]
         else:
             msg = int(params[0])
@@ -21,13 +21,13 @@ class Extension(Super):
             if msg in self.cache:
                 msg = self.cache[msg]
             else:
-                msg = await self.bot.get_message(channel, msg)
+                msg = await channel.get_message(msg)
                 if msg:
                     self.cache[msg.id] = msg
                 else:
                     await self.reply(message, 'Unknown message ID', True)
                     return
-            await self.bot.purge_from(channel, after=msg)
+            await channel.purge(after=msg)
             await self.reply(message, 'Channel cleaned!', True)
         else:
             await self.reply(message, 'Could you specify the message ID of the message you want to delete?', True)

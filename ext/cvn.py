@@ -101,20 +101,20 @@ class Extension(Super):
 
     async def update_links(self, invocation, message=None):
         if not message:
-            message = await self.bot.send_message(invocation.channel, 'Initializing...')
+            message = await invocation.channel.send('Initializing...')
         await asyncio.sleep(5)
         if self.titlelen == None:
-            await self.bot.edit_message(message, new_content='**Stage #1:** *Fetching titles...*\n%d titles fetched' % len(self.titles))
+            await message.edit(content='**Stage #1:** *Fetching titles...*\n%d titles fetched' % len(self.titles))
         elif len(self.titles) != 0:
-            await self.bot.edit_message(message, new_content='**Stage #2:** *Fetching links...*\n%d/%d titles left to check, %d links found' % (len(self.titles), self.titlelen, len(self.links)))
+            await message.edit(content='**Stage #2:** *Fetching links...*\n%d/%d titles left to check, %d links found' % (len(self.titles), self.titlelen, len(self.links)))
         else:
-            await self.bot.delete_message(message)
+            await message.delete()
             await self.reply(invocation, 'Links fetched, uploading file...', True)
             return
         await self.update_links(invocation, message)
 
     async def send_file(self, file, channel, filename):
-        await self.bot.send_file(channel, file, filename=filename)
+        await channel.send(file=discord.File(file, filename=filename))
         file.close()
 
     async def http(self, url, params):

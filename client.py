@@ -26,7 +26,7 @@ class Bot(Client):
         await self.dispatch_listener('client', 'ready')
         if('game' in self.config):
             conf = self.config['game']
-            await self.change_presence(game=Game(name=conf['name'], type=int(conf.get('streaming', 0)), url=conf.get('url', 'https://github.com/KockaAdmiralac/KockaBot')))
+            await self.change_presence(status=Game(name=conf['name'], type=int(conf.get('streaming', 0)), url=conf.get('url', 'https://github.com/KockaAdmiralac/KockaBot')))
 
     async def on_message(self, message):
         if(

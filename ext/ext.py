@@ -16,16 +16,16 @@ class Extension(object):
     async def reply(self, message, reply_with, mention=False, delete=True):
         if(mention):
             reply_with = '%s: %s' % (message.author.mention, reply_with)
-        msg = await self.bot.send_message(message.channel, reply_with)
+        msg = await message.channel.send(reply_with)
         if(delete and self.delete):
             async def delete_message():
                 await asyncio.sleep(self.delete)
                 try:
-                    await self.bot.delete_message(message)
+                    await message.delete()
                 except NotFound:
                     print('Message not found while deleting reply')
                 try:
-                    await self.bot.delete_message(msg)
+                    await msg.delete()
                 except NotFound:
                     print('Message not found while deleting reply')
             asyncio.ensure_future(delete_message())
