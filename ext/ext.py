@@ -23,11 +23,13 @@ class Extension(object):
                 try:
                     await message.delete()
                 except NotFound:
-                    print('Message not found while deleting reply')
+                    # print('Message not found while deleting reply')
+                    pass
                 try:
                     await msg.delete()
                 except NotFound:
-                    print('Message not found while deleting reply')
+                    # print('Message not found while deleting reply')
+                    pass
             asyncio.ensure_future(delete_message())
 
     async def call_command(self, message, command, args):

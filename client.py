@@ -1,4 +1,4 @@
-from discord import Client, Game
+from discord import Activity, ActivityType, Client
 from errors import ConfigurationError
 import asyncio
 
@@ -26,7 +26,7 @@ class Bot(Client):
         await self.dispatch_listener('client', 'ready')
         if('game' in self.config):
             conf = self.config['game']
-            await self.change_presence(status=Game(name=conf['name'], type=int(conf.get('streaming', 0)), url=conf.get('url', 'https://github.com/KockaAdmiralac/KockaBot')))
+            await self.change_presence(activity=Activity(name=conf['name'], type=ActivityType.watching))
 
     async def on_message(self, message):
         if(
@@ -65,13 +65,13 @@ class Bot(Client):
     async def on_reaction_clear(self, message, reactions):
         await self.dispatch_listener('reaction', 'clear', message, reactions)
 
-    async def on_channel_create(self, channel):
+    async def on_guild_channel_create(self, channel):
         await self.dispatch_listener('channel', 'create', channel)
 
-    async def on_channel_delete(self, channel):
+    async def on_guild_channel_delete(self, channel):
         await self.dispatch_listener('channel', 'delete', channel)
 
-    async def on_channel_update(self, old, new):
+    async def on_guild_channel_update(self, old, new):
         await self.dispatch_listener('channel', 'update', old, new)
 
     async def on_member_join(self, member):
@@ -83,41 +83,41 @@ class Bot(Client):
     async def on_member_update(self, before, after):
         await self.dispatch_listener('member', 'update', before, after)
 
-    async def on_server_join(self, server):
+    async def on_guild_join(self, server):
         await self.dispatch_listener('server', 'create', server)
 
-    async def on_server_remove(self, server):
+    async def on_guild_remove(self, server):
         await self.dispatch_listener('server', 'delete', server)
 
-    async def on_server_update(self, old, new):
+    async def on_guild_update(self, old, new):
         await self.dispatch_listener('server', 'update', old, new)
 
-    async def on_server_role_create(self, role):
+    async def on_guild_role_create(self, role):
         await self.dispatch_listener('role', 'create', role)
 
-    async def on_server_role_delete(self, role):
+    async def on_guild_role_delete(self, role):
         await self.dispatch_listener('role', 'delete', role)
 
-    async def on_server_role_update(self, old, new):
+    async def on_guild_role_update(self, old, new):
         await self.dispatch_listener('role', 'update', old, new)
 
-    async def on_server_emojis_update(self, old, new):
-        await self.dispatch_listener('emoji', 'update', old, new)
+    async def on_guild_emojis_update(self, server, old, new):
+        await self.dispatch_listener('emoji', 'update', server, old, new)
 
-    async def on_server_available(self, server):
+    async def on_guild_available(self, server):
         await self.dispatch_listener('availability', 'create', server)
 
-    async def on_server_unavailable(self, server):
+    async def on_guild_unavailable(self, server):
         await self.dispatch_listener('availability', 'delete', server)
 
-    async def on_voice_state_update(self, old, new):
-        await self.dispatch_listener('voice_state', 'update', old, new)
+    async def on_voice_state_update(self, member, old, new):
+        await self.dispatch_listener('voice_state', 'update', member, old, new)
 
-    async def on_member_ban(self, member):
-        await self.dispatch_listener('ban', 'create', member)
+    async def on_member_ban(self, guild, member):
+        await self.dispatch_listener('ban', 'create', guild, member)
 
-    async def on_member_unban(self, member):
-        await self.dispatch_listener('ban', 'delete', member)
+    async def on_member_unban(self, guild, member):
+        await self.dispatch_listener('ban', 'delete', guild, member)
 
     async def on_typing(self, channel, user, time):
         await self.dispatch_listener('member', 'typing', channel, user, time)
