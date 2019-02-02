@@ -26,7 +26,7 @@ class Extension(Super):
             'w': '{{{{badwiki|{0}}}}}'.format('}}\n{{badwiki|'.join(self.temp['w'])),
             's': '== {0} ==\n{{{{Report spam|{0}|Spam|{1}|{{{{subst:REVISIONUSER}}}}|~~~~~}}}}'.format(p, '|'.join(self.temp['s'].get(p, []))),
             'p': '== {0} ==\n{{{{Report profile|{0}|Spam|{1}|{{{{subst:REVISIONUSER}}}}|~~~~~}}}}'.format(p, '|'.join(self.temp['p'].get(p, []))),
-            'b': '\n'.join([ ('* [[w:c:{0}:Special:Contribs/{1}|{1}]]'.format(x.split(':')[0], x.split(':')[1])) for x in self.temp['b'] ])
+            'b': '\n'.join([ ('* [[w:c:{0}:Special:Contribs/{1}|{1}]]'.format(x.split(':')[0], ':'.join(x.split(':')[1:]))) for x in self.temp['b'] ])
         }[t]
 
     async def update_report(self, msg=None):

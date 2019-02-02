@@ -1,4 +1,5 @@
 from aiohttp import ClientSession as HTTP
+from discord import File
 from ext import Extension as Super
 from tempfile import NamedTemporaryFile
 from threading import Thread
@@ -114,7 +115,7 @@ class Extension(Super):
         await self.update_links(invocation, message)
 
     async def send_file(self, file, channel, filename):
-        await channel.send(file=discord.File(file, filename=filename))
+        await channel.send(file=File(file, filename=filename))
         file.close()
 
     async def http(self, url, params):
