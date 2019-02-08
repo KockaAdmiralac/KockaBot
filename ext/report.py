@@ -1,5 +1,4 @@
 from aiohttp import ClientSession as HTTP
-from discord import AsyncWebhookAdapter, Webhook
 from ext import Extension as Super
 import load
 import mwclient
@@ -70,19 +69,14 @@ class Extension(Super):
             ][flag]()
 
     async def webhook(self, user, flag, target):
-        async with HTTP() as session:
-            action = ''
-            if flag == FLAG_REPORT:
-                action = 'reported'
-            elif flag == FLAG_UNREPORT:
-                action = 'unreported'
-            elif flag == FLAG_RESOLVE:
-                action = 'resolved'
-            await Webhook.partial(
-                self.config['webhook_id'],
-                self.config['webhook_token'],
-                adapter=AsyncWebhookAdapter(session)
-            ).send('%s %s %s.' % (user.name, action, target))
+        action = ''
+        if flag == FLAG_REPORT:
+            action = 'reported'
+        elif flag == FLAG_UNREPORT:
+            action = 'unreported'
+        elif flag == FLAG_RESOLVE:
+            action = 'resolved'
+        await self.bot.get_channel(self.config['log_channel']).send('%s %s %s.' % (user.name, action, target))
 
     async def base_report(self, message, params, flag):
         params.append('')
