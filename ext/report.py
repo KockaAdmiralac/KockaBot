@@ -1,3 +1,5 @@
+from aiohttp import ClientSession as HTTP
+from discord import AsyncWebhookAdapter, Webhook
 from ext import Extension as Super
 import load
 import mwclient
@@ -51,10 +53,6 @@ class Extension(Super):
         if(msg):
             await self.reply(msg, 'Reports updated!', True)
 
-
-    def is_spam_type(self, t):
-        return t in ['s', 'p']
-
     def modify_array(self, array, el, flag, nosplit=False):
         # Don't ask. Please just don't ask.
         if nosplit:
@@ -71,6 +69,21 @@ class Extension(Super):
                 lambda: temp(array)
             ][flag]()
 
+    async def webhook(self, user, flag, target):
+        async with HTTP() as session:
+            action = ''
+            if flag == FLAG_REPORT:
+                action = 'reported'
+            elif flag == FLAG_UNREPORT:
+                action = 'unreported'
+            elif flag == FLAG_RESOLVE:
+                action = 'resolved'
+            await Webhook.partial(
+                self.config['webhook_id'],
+                self.config['webhook_token'],
+                adapter=AsyncWebhookAdapter(session)
+            ).send('%s %s %s.' % (user.name, action, target))
+
     async def base_report(self, message, params, flag):
         params.append('')
         t = params[0].lower()
@@ -80,12 +93,24 @@ class Extension(Super):
                 if len(split) > 1 and split[1] == 'f':
                     split[0] = split[0] + '||fandom'
                 self.modify_array(self.temp[t], split[0], flag, nosplit=True)
+            if flag == FLAG_RESOLVE:
+                await self.webhook(message.author, flag, 'wiki reports')
+            else:
+                await self.webhook(message.author, flag, 'wiki(s): %s' % params[1])
             await self.update_report(message)
-        elif self.is_spam_type(t):
+        elif t == 's' or t == 'p':
             wiki = params[1].lower()
             if not wiki in self.temp[t]:
                 self.temp[t][wiki] = []
-            self.modify_array(self.temp[t][wiki], ' '.join(params[2:]).strip(), flag)
+            name = 'spam'
+            if t == 'p':
+                name = 'spam profiles'
+            users = ' '.join(params[2:]).strip()
+            self.modify_array(self.temp[t][wiki], users, flag)
+            if flag == FLAG_RESOLVE:
+                await self.webhook(message.author, flag, '%s from %s' % (name, wiki))
+            else:
+                await self.webhook(message.author, flag, '%s from %s: %s' % (name, wiki, users))
             await self.update_report(message)
         elif t == 'b' or t == 'x':
             wiki = params[1]
@@ -93,10 +118,13 @@ class Extension(Super):
             if len(split) >= 2:
                 wiki = split[0].lower()
                 params[2] = ':'.join(split[1:])
-                self.modify_array(self.temp['b'], wiki + ':' + ' '.join(params[2:]).strip(), flag)
+                users = wiki + ':' + ' '.join(params[2:]).strip()
+                self.modify_array(self.temp['b'], users, flag)
+                await self.webhook(message.author, flag, 'XRumer spam: %s' % users)
                 await self.update_report(message)
             elif flag == FLAG_RESOLVE:
                 self.modify_array(self.temp['b'], wiki + ':' + ' '.join(params[2:]).strip(), flag)
+                await self.webhook(message.author, flag, 'XRumer spam')
                 await self.update_report(message)
             else:
                 await self.reply(message, 'Format for biglist spam is `!report b wiki:user`!')

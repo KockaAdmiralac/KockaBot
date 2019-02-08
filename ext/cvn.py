@@ -92,7 +92,7 @@ class Extension(Super):
             'format': 'json'
         })
         if res and ('query' in res) and ('pages' in res['query']):
-            for k, p in res['query']['pages'].items():
+            for _, p in res['query']['pages'].items():
                 if 'extlinks' in p:
                     links = map(lambda a: a['*'], p['extlinks'])
                     self.links += links
