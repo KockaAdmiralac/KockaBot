@@ -11,11 +11,11 @@ class Extension(Super):
         self.data = load.load_data('profile')
         self.register_commands('profile', 'verify')
         self.mention_regex = re.compile(r'<@!?(\d+)>')
-        self.domain = config.get('domain', 'ut')
+        self.domain = config.get('domain', 'undertale.fandom.com')
         self.initialized = False
 
     def user_profile(self, user):
-        return '<http://%s.wikia.com/wiki/Special:Contribs/%s>' % (self.domain, quote(user))
+        return '<https://%s/wiki/Special:Contribs/%s>' % (self.domain, quote(user))
 
     async def command_profile(self, message, params):
         key = self.mention_regex.findall(params[0])[0]
@@ -36,7 +36,7 @@ class Extension(Super):
         self.initialize()
         # Check permissions
         if message.channel != self.bind_channel:
-            pass
+            return
         # Parsing parameters
         id = self.mention_regex.findall(params[0])[0]
         user = self.join_params(params[1:])
@@ -49,13 +49,13 @@ class Extension(Super):
         requests.post('https://discordapp.com/api/webhooks/%s/%s' % (self.config['webhook_id'], self.config['webhook_token']), json={ 'content': '<@!%s> - [%s](%s)' % (id, user, self.user_profile(user)) })
         # Clearing the channel
         msg = await self.clear_channel.get_message(self.config['welcome_msg'])
-        delete = await self.clear_channel.purge(after=msg)
+        await self.clear_channel.purge(after=msg)
         # Responding
         await self.reply(message, 'Added %s to database!' % params[0], True)
 
     async def on_member_create(self, member):
         self.initialize()
-        if(member.id in self.data):
+        if (member.id in self.data or str(member.id) in self.data):
             await member.add_roles(self.role)
         else:
             await self.clear_channel.send(self.config['welcome'] % member.mention)

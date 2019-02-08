@@ -28,10 +28,10 @@ class Extension(Super):
             return
         wiki = params[0]
         if self.confirm:
-            self.api = 'http://%s.wikia.com/api.php' % wiki
+            self.api = 'https://%s/api.php' % wiki
             self.start_process(self.links_process(wiki, message))
         else:
-            await self.reply(message, 'This command is going to search for links on <http://%s.wikia.com>. Enter the command again to confirm or `!cancelprocess` to cancel.' % params[0], True)
+            await self.reply(message, 'This command is going to search for links on <https://%s>. Enter the command again to confirm or `!cancelprocess` to cancel.' % params[0], True)
         self.confirm = not self.confirm
 
     async def links_process(self, wiki, message):
