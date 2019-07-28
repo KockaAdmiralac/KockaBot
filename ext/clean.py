@@ -21,7 +21,7 @@ class Extension(Super):
             if msg in self.cache:
                 msg = self.cache[msg]
             else:
-                msg = await channel.get_message(msg)
+                msg = await channel.fetch_message(msg)
                 if msg:
                     self.cache[msg.id] = msg
                 else:

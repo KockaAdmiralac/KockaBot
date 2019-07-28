@@ -48,7 +48,7 @@ class Extension(Super):
         # Posting to webhook
         requests.post('https://discordapp.com/api/webhooks/%s/%s' % (self.config['webhook_id'], self.config['webhook_token']), json={ 'content': '<@!%s> - [%s](%s)' % (id, user, self.user_profile(user)) })
         # Clearing the channel
-        msg = await self.clear_channel.get_message(self.config['welcome_msg'])
+        msg = await self.clear_channel.fetch_message(self.config['welcome_msg'])
         await self.clear_channel.purge(after=msg)
         # Responding
         await self.reply(message, 'Added %s to database!' % params[0], True)
